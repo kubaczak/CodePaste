@@ -1,0 +1,13 @@
+# USER
+- Login
+- Register
+
+# Paste
+/create
+{id, content, author, date, lang}
+
+/edit
+{id, content, author, date, lang}
+
+/del
+{id, user}

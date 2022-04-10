@@ -1,0 +1,28 @@
+{
+    "name": "codepaste",
+    "version": "1.0.0",
+    "description": "Pastebin-like web application written in Node (Just a school project)",
+    "main": "index.js",
+    "scripts": {
+        "server": "node ./server/index.js",
+        "client": "node ./client/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kubaczak/CodePaste.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/kubaczak/CodePaste/issues"
+    },
+    "homepage": "https://github.com/kubaczak/CodePaste#readme",
+    "dependencies": {
+        "bcrypt": "^5.0.1",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.0",
+        "express": "^4.17.2",
+        "mongoose": "^6.2.10"
+    }
+}
