@@ -89,6 +89,35 @@ router.route("/singup").post((req, res, next) => {
         })
 })
 
+router.route("/delete").delete((req, res) => {
+    let token = req.body.token;
+    let decoded;
+    if (!token) {
+        return res.status(401).json({ "error": "No token provided." });
+    }
+    try {
+        decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+    } catch (err) {
+        return res.status(400).json({ "error": "Token invalid." });
+    }
+    User.findById(decoded.userId)
+        .then(usr => {
+            if (!usr) {
+                return res.status(401).json({ "error": "User not exists" });
+            }
+            User.findByIdAndRemove(decoded.userId)
+                .then(() => {
+                    return res.json({ status: "Accound with id " + decoded.userId + " deleted!" });
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    return;
+})
 
 router.route("/test").post((req, res) => {
     let token = req.body.token;
