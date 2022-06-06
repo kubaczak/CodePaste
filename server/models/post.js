@@ -4,25 +4,25 @@ const Schema = mongoose.Schema;
 
 const pasteSchema = new Schema({
     author: {
-        type: Schema.Types.ObjectId
+        type: Schema.Types.ObjectId,
     },
     paste: {
-        type: String
+        type: String,
     },
     lang: {
-        type: String
+        type: String,
     },
     stars: {
         type: Number,
-        default: 0
+        default: 0,
     },
     starsUsers: [{
-        type: Schema.Types.ObjectId
-    }],
+        type: Schema.Types.ObjectId,
+    }, ],
     views: {
         type: Number,
-        default: 0
-    }
+        default: 0,
+    },
 }, {
     timestamps: true,
 });

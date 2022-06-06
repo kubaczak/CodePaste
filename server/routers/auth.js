@@ -2,61 +2,74 @@ const router = require('express').Router();
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const {
-    createJWT,
-} = require("../utils/auth");
+const { createJWT } = require('../utils/auth');
 
-router.route("/singin").post((req, res) => {
+router.route('/singin').post((req, res) => {
     let { username, password, email } = req.body;
-    User.findOne({ username: username }).then(user => {
-        if (!user) {
-            return res.status(404).json({
-                errors: [{ user: "not found" }],
-            });
-        } else {
-            bcrypt.compare(password, user.password).then(isMatch => {
-                if (!isMatch) {
-                    return res.status(400).json({
-                        errors: [{
-                            password: "incorrect"
-                        }]
-                    });
-                }
-                let access_token = createJWT(
-                    user.username,
-                    user.email,
-                    user._id,
-                    36000
-                );
-                jwt.verify(access_token, process.env.TOKEN_SECRET, (err,
-                    decoded) => {
-                    if (err) {
-                        res.status(500).json({ erros: err });
-                    }
-                    if (decoded) {
-                        return res.status(200).json({
-                            success: true,
-                            token: access_token,
-                            message: user
-                        });
-                    }
+    User.findOne({ username: username })
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({
+                    errors: [{ user: 'not found' }],
                 });
-            }).catch(err => {
-                console.log(err)
-                res.status(500).json({ erros: err });
-            });
-        }
-    }).catch(err => {
-        res.status(500).json({ erros: err });
-    });
-})
+            } else {
+                bcrypt
+                    .compare(password, user.password)
+                    .then((isMatch) => {
+                        if (!isMatch) {
+                            return res.status(400).json({
+                                errors: [{
+                                    password: 'incorrect',
+                                }, ],
+                            });
+                        }
+                        let access_token = createJWT(
+                            user.username,
+                            user.email,
+                            user._id,
+                            36000
+                        );
+                        jwt.verify(
+                            access_token,
+                            process.env.TOKEN_SECRET,
+                            (err, decoded) => {
+                                if (err) {
+                                    res.status(500).json({ erros: err });
+                                }
+                                if (decoded) {
+                                    return res
+                                        .status(200)
+                                        .cookie('token', access_token, {
+                                            maxAge: 10 * 60 * 60 * 1000,
+                                        })
+                                        .json({
+                                            success: true,
+                                            token: access_token,
+                                            message: user,
+                                        });
+                                }
+                            }
+                        );
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        res.status(500).json({ erros: err });
+                    });
+            }
+        })
+        .catch((err) => {
+            res.status(500).json({ erros: err });
+        });
+});
 
-router.route("/singup").post((req, res, next) => {
+router.route('/singup').post((req, res, next) => {
     let { username, password, email } = req.body;
     User.findOne({ email: email })
-        .then(user => {
+        .then((user) => {
             if (user) {
-                return res.status(422).json({ errors: [{ user: "email already exists" }] });
+                return res
+                    .status(422)
+                    .json({ errors: [{ user: 'email already exists' }] });
             } else {
                 const user = new User({
                     username: username,
@@ -67,73 +80,76 @@ router.route("/singup").post((req, res, next) => {
                     bcrypt.hash(password, salt, function(err, hash) {
                         if (err) throw err;
                         user.password = hash;
-                        user.save()
-                            .then(response => {
+                        user
+                            .save()
+                            .then((response) => {
                                 res.status(200).json({
                                     success: true,
-                                    result: response
-                                })
+                                    result: response,
+                                });
                             })
-                            .catch(err => {
+                            .catch((err) => {
                                 res.status(500).json({
-                                    errors: [{ error: err }]
+                                    errors: [{ error: err }],
                                 });
                             });
                     });
                 });
             }
-        }).catch(err => {
-            res.status(500).json({
-                errors: [{ error: 'Something went wrong' }]
-            });
         })
-})
+        .catch((err) => {
+            res.status(500).json({
+                errors: [{ error: 'Something went wrong' }],
+            });
+        });
+});
 
-router.route("/delete").delete((req, res) => {
+router.route('/delete').delete((req, res) => {
     let token = req.body.token;
     let decoded;
     if (!token) {
-        return res.status(401).json({ "error": "No token provided." });
+        return res.status(401).json({ error: 'No token provided.' });
     }
     try {
         decoded = jwt.verify(token, process.env.TOKEN_SECRET);
     } catch (err) {
-        return res.status(400).json({ "error": "Token invalid." });
+        return res.status(400).json({ error: 'Token invalid.' });
     }
     User.findById(decoded.userId)
-        .then(usr => {
+        .then((usr) => {
             if (!usr) {
-                return res.status(401).json({ "error": "User not exists" });
+                return res.status(401).json({ error: 'User not exists' });
             }
             User.findByIdAndRemove(decoded.userId)
                 .then(() => {
-                    return res.json({ status: "Accound with id " + decoded.userId + " deleted!" });
+                    return res.json({
+                        status: 'Accound with id ' + decoded.userId + ' deleted!',
+                    });
                 })
                 .catch((err) => {
-                    console.log(err)
-                })
+                    console.log(err);
+                });
         })
         .catch((err) => {
-            console.log(err)
-        })
+            console.log(err);
+        });
     return;
-})
+});
 
-router.route("/test").post((req, res) => {
+router.route('/test').post((req, res) => {
     let token = req.body.token;
     let decoded;
     if (!token) {
-        return res.status(401).json({ "error": "No token provided." });
+        return res.status(401).json({ error: 'No token provided.' });
     }
     try {
         decoded = jwt.verify(token, process.env.TOKEN_SECRET);
     } catch (err) {
-        return res.status(400).json({ "error": "Token invalid." });
+        return res.status(400).json({ error: 'Token invalid.' });
     }
-    console.log(decoded.userId)
-    res.json({ "Twoje id": decoded.userId });
+    console.log(decoded.userId);
+    res.json({ 'Twoje id': decoded.userId });
     return;
-})
-
+});
 
 module.exports = router;

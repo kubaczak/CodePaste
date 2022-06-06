@@ -2,10 +2,9 @@
     "name": "codepaste",
     "version": "1.0.0",
     "description": "Pastebin-like web application written in Node (Just a school project)",
-    "main": "index.js",
+    "main": "app.js",
     "scripts": {
-        "server": "node ./server/index.js",
-        "client": "node ./client/index.js"
+        "server": "node ."
     },
     "repository": {
         "type": "git",
